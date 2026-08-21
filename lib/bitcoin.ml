@@ -19,8 +19,16 @@ module Codec = Codec
 
 module Network = Network
 
+(** {1 Amounts} *)
+
+module Amount = Amount
+
 (** {1 Keys, scripts and addresses} *)
 
 module Key = Key
 module Script = Script
 module Address = Address
+
+(** {1 Transactions} *)
+
+module Tx = Tx

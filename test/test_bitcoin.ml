@@ -372,7 +372,7 @@ let prop_bech32_detects_mutation =
 
 let () =
   Alcotest.run "bitcoin"
-    (Test_backend.suite @ Test_keys.suite
+    (Test_backend.suite @ Test_keys.suite @ Test_tx.suite
     @ [
         ( "hash",
           [

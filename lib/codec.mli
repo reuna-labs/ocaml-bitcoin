@@ -11,7 +11,9 @@ type error =
   [ `Eof of int
   | `Trailing of int
   | `Non_canonical_varint
-  | `Overflow of string
+  | `Overflow of string  (** a value too large for the target type *)
+  | `Invalid_range
+    (** a value outside what the protocol permits, such as an amount above the supply *)
   | `Invalid_format
   | `Msg of string ]
 

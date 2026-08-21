@@ -3,6 +3,7 @@ type error =
   | `Trailing of int
   | `Non_canonical_varint
   | `Overflow of string
+  | `Invalid_range
   | `Invalid_format
   | `Msg of string ]
 
