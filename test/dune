@@ -1,5 +1,12 @@
 (test
  (name test_bitcoin)
- (libraries bitcoin alcotest qcheck-core qcheck-alcotest ohex yojson)
+ (libraries
+  bitcoin
+  bitcoin.backend
+  alcotest
+  qcheck-core
+  qcheck-alcotest
+  ohex
+  yojson)
  (deps
   (glob_files vectors/*)))

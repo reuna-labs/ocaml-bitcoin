@@ -1,0 +1,9 @@
+; The library's only point of contact with a secp256k1 implementation.
+; Virtual so a build can choose one: `bitcoin.backend-mirage` is the
+; default and the only one that cross-compiles to Solo5.
+
+(library
+ (name bitcoin_backend)
+ (public_name bitcoin.backend)
+ (virtual_modules backend)
+ (default_implementation bitcoin.backend-mirage))

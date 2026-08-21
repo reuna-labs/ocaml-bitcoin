@@ -1,0 +1,11 @@
+; The default implementation: constant-time secp256k1 from mirage-crypto-ec
+; for everything touching a secret, and mirage-crypto-blockchain for point
+; arithmetic on public data (which mirage-crypto-ec does not expose for this
+; curve). Both are pure OCaml plus vendored C stubs, so both cross-compile
+; to Solo5; neither resolves a host library through pkg-config.
+
+(library
+ (name bitcoin_backend_mirage)
+ (public_name bitcoin.backend-mirage)
+ (implements bitcoin.backend)
+ (libraries zarith eqaf mirage-crypto-ec mirage-crypto-blockchain))

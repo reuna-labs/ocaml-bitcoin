@@ -360,53 +360,54 @@ let prop_bech32_detects_mutation =
 
 let () =
   Alcotest.run "bitcoin"
-    [
-      ( "hash",
-        [
-          Alcotest.test_case "known digests" `Quick hash_vectors;
-          Alcotest.test_case "BIP340 tagged hash" `Quick hash_tagged;
-        ] );
-      ( "base58",
-        [
-          Alcotest.test_case "Bitcoin Core vectors" `Quick base58_core_vectors;
-          Alcotest.test_case "Base58Check" `Quick base58_check;
-          Alcotest.test_case "leading zeros" `Quick base58_leading_zeros;
-          Alcotest.test_case "rejects ambiguous characters" `Quick base58_rejects;
-        ] );
-      ( "bech32",
-        [
-          Alcotest.test_case "valid checksums (BIP173/350)" `Quick bech32_valid_checksums;
-          Alcotest.test_case "invalid checksums" `Quick bech32_invalid_checksums;
-          Alcotest.test_case "valid segwit addresses" `Quick bech32_valid_addresses;
-          Alcotest.test_case "invalid segwit addresses" `Quick bech32_invalid_addresses;
-          Alcotest.test_case "invalid encode requests" `Quick bech32_invalid_encodes;
-          Alcotest.test_case "hrp dispatch" `Quick bech32_hrp_dispatch;
-          Alcotest.test_case "length limit" `Quick bech32_length_limit;
-        ] );
-      ( "codec",
-        [
-          Alcotest.test_case "integers" `Quick codec_integers;
-          Alcotest.test_case "varint encoding" `Quick codec_varint_encoding;
-          Alcotest.test_case "varint rejects non-canonical" `Quick codec_varint_non_canonical;
-          Alcotest.test_case "bounds and truncation" `Quick codec_bounds;
-          Alcotest.test_case "vectors, varstr, with_length" `Quick codec_composites;
-          Alcotest.test_case "sub-reader" `Quick codec_sub_reader;
-          Alcotest.test_case "hash combinators" `Quick codec_hash_combinators;
-        ] );
-      ( "network",
-        [
-          Alcotest.test_case "parameters" `Quick network_params;
-          Alcotest.test_case "testnets are indistinguishable" `Quick
-            network_testnets_are_indistinguishable;
-        ] );
-      ( "properties",
-        List.map QCheck_alcotest.to_alcotest
+    (Test_backend.suite
+    @ [
+        ( "hash",
           [
-            prop_varint_roundtrip;
-            prop_varint_minimal;
-            prop_reader_total;
-            prop_base58_roundtrip;
-            prop_base58_check_roundtrip;
-            prop_bech32_detects_mutation;
+            Alcotest.test_case "known digests" `Quick hash_vectors;
+            Alcotest.test_case "BIP340 tagged hash" `Quick hash_tagged;
           ] );
-    ]
+        ( "base58",
+          [
+            Alcotest.test_case "Bitcoin Core vectors" `Quick base58_core_vectors;
+            Alcotest.test_case "Base58Check" `Quick base58_check;
+            Alcotest.test_case "leading zeros" `Quick base58_leading_zeros;
+            Alcotest.test_case "rejects ambiguous characters" `Quick base58_rejects;
+          ] );
+        ( "bech32",
+          [
+            Alcotest.test_case "valid checksums (BIP173/350)" `Quick bech32_valid_checksums;
+            Alcotest.test_case "invalid checksums" `Quick bech32_invalid_checksums;
+            Alcotest.test_case "valid segwit addresses" `Quick bech32_valid_addresses;
+            Alcotest.test_case "invalid segwit addresses" `Quick bech32_invalid_addresses;
+            Alcotest.test_case "invalid encode requests" `Quick bech32_invalid_encodes;
+            Alcotest.test_case "hrp dispatch" `Quick bech32_hrp_dispatch;
+            Alcotest.test_case "length limit" `Quick bech32_length_limit;
+          ] );
+        ( "codec",
+          [
+            Alcotest.test_case "integers" `Quick codec_integers;
+            Alcotest.test_case "varint encoding" `Quick codec_varint_encoding;
+            Alcotest.test_case "varint rejects non-canonical" `Quick codec_varint_non_canonical;
+            Alcotest.test_case "bounds and truncation" `Quick codec_bounds;
+            Alcotest.test_case "vectors, varstr, with_length" `Quick codec_composites;
+            Alcotest.test_case "sub-reader" `Quick codec_sub_reader;
+            Alcotest.test_case "hash combinators" `Quick codec_hash_combinators;
+          ] );
+        ( "network",
+          [
+            Alcotest.test_case "parameters" `Quick network_params;
+            Alcotest.test_case "testnets are indistinguishable" `Quick
+              network_testnets_are_indistinguishable;
+          ] );
+        ( "properties",
+          List.map QCheck_alcotest.to_alcotest
+            [
+              prop_varint_roundtrip;
+              prop_varint_minimal;
+              prop_reader_total;
+              prop_base58_roundtrip;
+              prop_base58_check_roundtrip;
+              prop_bech32_detects_mutation;
+            ] );
+      ])
