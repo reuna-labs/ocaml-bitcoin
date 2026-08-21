@@ -2,3 +2,16 @@
  (name bitcoin)
  (public_name bitcoin)
  (libraries zarith digestif base64 bitcoin.backend))
+
+; The BIP39 wordlist is compiled in, never read from disk: a unikernel has
+; no filesystem to read it from.
+
+(rule
+ (target bip39_wordlist.ml)
+ (deps
+  (:txt %{project_root}/bip39/english.txt)
+  (:gen %{project_root}/bip39/gen/gen_wordlist.exe))
+ (action
+  (with-stdout-to
+   %{target}
+   (run %{gen} %{txt}))))

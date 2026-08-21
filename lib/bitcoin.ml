@@ -40,3 +40,9 @@ module Taproot = Taproot
 (** {1 Signature hashes} *)
 
 module Sighash = Sighash
+
+(** {1 Hierarchical deterministic keys} *)
+
+module Derivation_path = Derivation_path
+module Bip32 = Bip32
+module Bip39 = Bip39

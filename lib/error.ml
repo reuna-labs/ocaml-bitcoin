@@ -15,6 +15,7 @@ type t =
   | `Too_deep
   | `Not_in_tree
   | `Prevout_mismatch
+  | `Hardened_from_public
   | `Msg of string ]
 
 let pp ppf (e : [< t ]) =
@@ -39,6 +40,8 @@ let pp ppf (e : [< t ]) =
   | `Not_in_tree -> Format.pp_print_string ppf "leaf is not in this output's script tree"
   | `Prevout_mismatch ->
       Format.pp_print_string ppf "prevout list does not match the transaction's inputs"
+  | `Hardened_from_public ->
+      Format.pp_print_string ppf "a hardened child cannot be derived from an extended public key"
   | `Msg m -> Format.pp_print_string ppf m
 
 let to_string e = Format.asprintf "%a" pp e

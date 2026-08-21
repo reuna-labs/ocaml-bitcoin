@@ -1,0 +1,5 @@
+; Turns the BIP39 wordlist into an OCaml array at build time. The library
+; must not read it from disk: there is no filesystem inside a unikernel.
+
+(executable
+ (name gen_wordlist))

@@ -21,6 +21,7 @@ type t =
   | `Too_deep  (** a script tree deeper than BIP341 permits *)
   | `Not_in_tree  (** a leaf that the output being spent does not commit to *)
   | `Prevout_mismatch  (** a prevout list that does not match the transaction's inputs *)
+  | `Hardened_from_public  (** a hardened BIP32 child asked of an extended public key *)
   | `Msg of string ]
 
 val pp : Format.formatter -> [< t ] -> unit
