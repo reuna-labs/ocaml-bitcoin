@@ -1,0 +1,24 @@
+# DEVELOPMENT ONLY -- delete this file before submitting to opam-repository.
+#
+# `mirage-crypto-blockchain`, and the secp256k1/BIP340 support in
+# `mirage-crypto-ec`, are not yet in opam. Until they are, these pins let
+# `opam install --deps-only --with-test .` resolve them. Shas, never
+# branches, so builds are reproducible.
+pin-depends: [
+  [
+    "mirage-crypto.2.4.0"
+    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+  ]
+  [
+    "mirage-crypto-rng.2.4.0"
+    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+  ]
+  [
+    "mirage-crypto-ec.2.4.0"
+    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+  ]
+  [
+    "mirage-crypto-blockchain.2.4.0"
+    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+  ]
+]

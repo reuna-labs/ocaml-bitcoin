@@ -1,4 +1,0 @@
-(library
- (name bitcoin_ocurl)
- (public_name bitcoin-ocurl)
- (libraries bitcoin curl))

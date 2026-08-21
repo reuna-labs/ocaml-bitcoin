@@ -1,4 +1,0 @@
-(library
- (name bitcoin_ocamlnet)
- (public_name bitcoin-ocamlnet)
- (libraries bitcoin netclient))

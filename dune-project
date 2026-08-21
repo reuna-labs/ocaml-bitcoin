@@ -1,75 +1,53 @@
-(lang dune 2.8)
+(lang dune 3.6)
 
 (name bitcoin)
 
-(authors "Dario Teixeira <dario.teixeira@yahoo.com>")
+(generate_opam_files true)
 
-(maintainers
- "Dario Teixeira <dario.teixeira@yahoo.com>"
- "Michael Bacarella <m@bacarella.com>")
+(implicit_transitive_deps false)
 
 (source
- (github "darioteixeira/ocaml-bitcoin"))
+ (github reuna147/ocaml-bitcoin))
 
-(homepage "https://github.com/darioteixeira/ocaml-bitcoin")
+(license ISC)
 
-(generate_opam_files true)
+(authors "Gil Bahat <bahat.gil@gmail.com>")
+
+(maintainers "Gil Bahat <bahat.gil@gmail.com>")
+
+(documentation "https://reuna147.github.io/ocaml-bitcoin/")
 
 (package
  (name bitcoin)
- (synopsis "Bitcoin Client API logic-only")
- (license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
+ (synopsis
+  "Bitcoin primitives: keys, addresses, script, transactions, Taproot, PSBT")
  (description
-  "An OCaml interface to the official Bitcoin client API.\n   Works by making JSON-RPC calls over the network to a running\n   Bitcoin daemon\n  fering the client API.")
+  "A Bitcoin library for OCaml covering consensus serialization, keys and\naddresses, Bitcoin Script, transactions, all three sighash algorithms\n(legacy, BIP143 segwit v0, BIP341 Taproot), Taproot key- and script-path\nspends, BIP32/BIP39 hierarchical deterministic wallets, and BIP174 PSBT\nwith BIP371 Taproot fields.\n\nThe core library performs no I/O and does not depend on Unix, so it builds\nunmodified as a MirageOS/Solo5 unikernel.")
+ (tags
+  ("bitcoin" "cryptocurrency" "taproot" "psbt" "segwit" "org:mirage"))
  (depends
-  cryptokit
+  (ocaml
+   (>= 4.14.0))
+  (dune
+   (>= 3.6))
+  (zarith
+   (>= 1.13))
+  (digestif
+   (>= 1.2.0))
+  (base64
+   (>= 3.5.0))
+  (mirage-crypto-ec
+   (>= 2.1.0))
+  (mirage-crypto-rng
+   (>= 2.1.0))
+  mirage-crypto-blockchain
+  (alcotest :with-test)
+  (qcheck-alcotest :with-test)
+  (ohex
+   (and
+    :with-test
+    (>= 0.2.0)))
   (yojson
-   (>= 1.6.0))))
-
-(package
- (name bitcoin-cohttp-lwt)
- (synopsis "Bitcoin Client API cohttp-lwt interface")
- (license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
- (description "This is the cohttp-lwt I/O interface to the bitcoin client")
- (depends
-  (bitcoin
-   (= :version))
-  cohttp-lwt
-  cohttp-lwt-unix))
-
-(package
- (name bitcoin-cohttp-async)
- (synopsis "Bitcoin Client API cohttp-async interface")
- (license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
- (description "This is the cohttp-async I/O interface to the bitcoin client")
- (depends
-  (bitcoin
-   (= :version))
-  (cohttp-async
-   (>= 5.0.0))))
-
-;; XXX: disabling ocamlnet because it doesn't support OCaml 5.0.0 yet --mbacarella
-;(package
-; (name bitcoin-ocamlnet)
-; (synopsis "Bitcoin Client API ocamlnet interface")
-; (license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
-; (description "The ocamlnet I/O interface to the bitcoin client")
-; (depends bitcoin ocamlnet))
-
-(package
- (name bitcoin-ocurl)
- (synopsis "Bitcoin Client API ocurl interface")
- (license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
- (description "The ocurl I/O interface to the bitcoin client")
- (depends
-  (bitcoin
-   (= :version))
-  ocurl))
-
-;; XXX: not familiar enough with ocsigen to get this to build --mbacarella
-;(package
-; (name bitcoin-ocsigen)
-; (synopsis "Bitcoin Client API ocsigen interface")
-; (license "LGPL-2.1-only WITH OCaml-LGPL-linking-exception")
-; (description "The ocsigen I/O interface to the bitcoin client")
-; (depends bitcoin ocsigen-start))
+   (and
+    :with-test
+    (>= 2.0.0)))))

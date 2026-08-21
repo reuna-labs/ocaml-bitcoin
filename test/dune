@@ -1,3 +1,0 @@
-(executable
- (name test_cohttp_async)
- (libraries bitcoin-cohttp-async core_unix.command_unix))
