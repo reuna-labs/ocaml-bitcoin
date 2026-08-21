@@ -72,5 +72,7 @@ jobs:
         with:
           ocaml-compiler: "5.3"
       - run: opam install --deps-only --with-doc .
-      - run: opam install odoc
-      - run: opam exec -- dune build @doc
+      # odoc 3 changed the driver interface; dune's classic @doc target only
+      # works with odoc 2, and @doc-new only with odoc 3.
+      - run: opam install "odoc>=3.0.0"
+      - run: opam exec -- dune build @doc-new

@@ -1,7 +1,8 @@
 (** secp256k1 keys, WIF, and the two signature schemes Bitcoin uses.
 
-    A key is one value regardless of which cryptographic backend is doing the work underneath; see
-    {!Bitcoin.Backend} for how that is split.
+    A key is one value regardless of which cryptographic backend is doing the work underneath.
+    Signing runs on a constant-time implementation and public-key arithmetic on a variable-time one;
+    the split is internal and never reaches a caller.
 
     {1 Randomness}
 

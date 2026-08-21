@@ -29,9 +29,10 @@ module Key = Key
 module Script = Script
 module Address = Address
 
-(** {1 Transactions} *)
+(** {1 Transactions and blocks} *)
 
 module Tx = Tx
+module Block = Block
 
 (** {1 Taproot} *)
 

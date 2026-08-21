@@ -4,8 +4,8 @@
     vectors are a count followed by that many elements. This module is the spine every other
     serializable type sits on.
 
-    Readers raise {!R.Error} internally and are wrapped by {!R.run}, which is the only way to obtain
-    one, so no exception escapes. Writers cannot fail. *)
+    Readers raise {!R.Parse_error} internally and are wrapped by {!R.run}, which is the only way to
+    obtain one, so no exception escapes. Writers cannot fail. *)
 
 type error =
   [ `Eof of int
