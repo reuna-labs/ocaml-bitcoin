@@ -1,7 +1,11 @@
+; Zarith is deliberately absent here: only the secp256k1 backend needs
+; bignums, so GMP enters the dependency graph at exactly one point and can
+; leave it again the day constant-time scalar addition lands upstream.
+
 (library
  (name bitcoin)
  (public_name bitcoin)
- (libraries zarith digestif base64 bitcoin.backend))
+ (libraries digestif base64 bitcoin.backend))
 
 ; The BIP39 wordlist is compiled in, never read from disk: a unikernel has
 ; no filesystem to read it from.
