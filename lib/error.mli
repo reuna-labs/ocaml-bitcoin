@@ -20,6 +20,7 @@ type t =
   | `At_infinity
   | `Too_deep  (** a script tree deeper than BIP341 permits *)
   | `Not_in_tree  (** a leaf that the output being spent does not commit to *)
+  | `Prevout_mismatch  (** a prevout list that does not match the transaction's inputs *)
   | `Msg of string ]
 
 val pp : Format.formatter -> [< t ] -> unit

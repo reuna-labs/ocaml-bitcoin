@@ -14,6 +14,7 @@ type t =
   | `At_infinity
   | `Too_deep
   | `Not_in_tree
+  | `Prevout_mismatch
   | `Msg of string ]
 
 let pp ppf (e : [< t ]) =
@@ -36,6 +37,8 @@ let pp ppf (e : [< t ]) =
   | `At_infinity -> Format.pp_print_string ppf "point at infinity"
   | `Too_deep -> Format.pp_print_string ppf "script tree deeper than 128 levels"
   | `Not_in_tree -> Format.pp_print_string ppf "leaf is not in this output's script tree"
+  | `Prevout_mismatch ->
+      Format.pp_print_string ppf "prevout list does not match the transaction's inputs"
   | `Msg m -> Format.pp_print_string ppf m
 
 let to_string e = Format.asprintf "%a" pp e

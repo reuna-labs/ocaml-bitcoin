@@ -36,3 +36,7 @@ module Tx = Tx
 (** {1 Taproot} *)
 
 module Taproot = Taproot
+
+(** {1 Signature hashes} *)
+
+module Sighash = Sighash
