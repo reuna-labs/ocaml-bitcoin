@@ -18,3 +18,9 @@ module Codec = Codec
 (** {1 Chain parameters} *)
 
 module Network = Network
+
+(** {1 Keys, scripts and addresses} *)
+
+module Key = Key
+module Script = Script
+module Address = Address

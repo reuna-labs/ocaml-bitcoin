@@ -121,7 +121,7 @@ let bech32_invalid_addresses () =
           check_bool
             (Printf.sprintf "invalid address %S decoded under unknown hrp %S" s hrp)
             true
-            (Network.of_hrp hrp = None))
+            (Network.of_hrp hrp = []))
     Bech32_vectors.invalid_address
 
 let bech32_invalid_encodes () =
@@ -137,7 +137,7 @@ let bech32_hrp_dispatch () =
   let addr = "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4" in
   let hrp, _, _ = ok (Bech32.decode_segwit_any addr) in
   check_str "hrp" "bc" hrp;
-  check_bool "maps to mainnet class" true (Network.of_hrp hrp = Some `Main);
+  check_bool "maps to mainnet" true (Network.of_hrp hrp = [ Network.Mainnet ]);
   is_error "wrong hrp is rejected" (Bech32.decode_segwit ~hrp:"tb" addr)
 
 let bech32_length_limit () =
@@ -274,13 +274,17 @@ let network_params () =
   List.iter
     (fun n ->
       check_bool
-        ("hrp maps back " ^ Network.to_string n)
+        ("hrp admits itself " ^ Network.to_string n)
         true
-        (Network.of_hrp (Network.hrp n) = Some (Network.class_of n));
+        (List.mem n (Network.of_hrp (Network.hrp n)));
       check_bool
-        ("p2pkh maps back " ^ Network.to_string n)
+        ("p2pkh admits itself " ^ Network.to_string n)
         true
-        (Network.of_p2pkh_version (Network.p2pkh_version n) <> None);
+        (List.mem n (Network.of_p2pkh_version (Network.p2pkh_version n)));
+      check_bool
+        ("wif admits itself " ^ Network.to_string n)
+        true
+        (List.mem n (Network.of_wif_version (Network.wif_version n)));
       check_bool
         ("name round trip " ^ Network.to_string n)
         true
@@ -294,12 +298,20 @@ let network_params () =
   check_hex "mainnet magic" "f9beb4d9" (Network.magic Network.Mainnet)
 
 let network_testnets_are_indistinguishable () =
-  (* This is why decoding yields a class rather than a network. *)
+  (* This is why decoding yields a set of networks rather than one. *)
   List.iter
     (fun n ->
       check_str "shares tb" "tb" (Network.hrp n);
       check_int "shares p2pkh version" 0x6f (Network.p2pkh_version n))
-    [ Network.Testnet3; Network.Testnet4; Network.Signet ]
+    [ Network.Testnet3; Network.Testnet4; Network.Signet ];
+  (* Regtest has its own Bech32 part but the same Base58 bytes, so Base58
+     cannot separate it from the test networks at all. *)
+  check_str "regtest has its own hrp" "bcrt" (Network.hrp Network.Regtest);
+  check_int "but shares the p2pkh version" 0x6f (Network.p2pkh_version Network.Regtest);
+  check_bool "so base58 admits regtest and every test network" true
+    (List.sort compare (Network.of_p2pkh_version 0x6f)
+    = List.sort compare [ Network.Testnet3; Network.Testnet4; Network.Signet; Network.Regtest ]);
+  check_bool "while bcrt admits only regtest" true (Network.of_hrp "bcrt" = [ Network.Regtest ])
 
 (* ------------------------------------------------- property-based checks *)
 
@@ -360,7 +372,7 @@ let prop_bech32_detects_mutation =
 
 let () =
   Alcotest.run "bitcoin"
-    (Test_backend.suite
+    (Test_backend.suite @ Test_keys.suite
     @ [
         ( "hash",
           [

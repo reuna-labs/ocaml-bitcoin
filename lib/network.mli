@@ -19,16 +19,16 @@ val of_string : string -> t option
 val p2pkh_version : t -> int
 val p2sh_version : t -> int
 val wif_version : t -> int
-val of_p2pkh_version : int -> class_ option
-val of_p2sh_version : int -> class_ option
-val of_wif_version : int -> class_ option
+val of_p2pkh_version : int -> t list
+val of_p2sh_version : int -> t list
+val of_wif_version : int -> t list
 
 (** {1 Bech32} *)
 
 val hrp : t -> string
 (** ["bc"], ["tb"] or ["bcrt"]. *)
 
-val of_hrp : string -> class_ option
+val of_hrp : string -> t list
 
 (** {1 BIP32 extended key versions} *)
 
@@ -38,7 +38,7 @@ val bip32_public : t -> int32
 val bip32_private : t -> int32
 (** [0x0488ADE4] ([xprv]) on mainnet, [0x04358394] ([tprv]) elsewhere. *)
 
-val of_bip32_version : int32 -> (class_ * [ `Public | `Private ]) option
+val of_bip32_version : int32 -> (t list * [ `Public | `Private ]) option
 
 (** {1 P2P} *)
 
