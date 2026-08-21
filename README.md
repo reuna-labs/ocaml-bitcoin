@@ -124,11 +124,12 @@ Signing uses `mirage-crypto-ec`'s constant-time secp256k1. Public-key
 arithmetic — which operates only on public data — uses a variable-time
 implementation, which is safe by construction.
 
-One residual leak is known and deliberate: BIP32 child key derivation and
-Taproot key tweaking add a secret scalar modulo the curve order using
-arbitrary-precision arithmetic, which is not constant time. This is a much
-weaker leak than variable-time scalar multiplication, but it is real, and it
-will be removed once constant-time scalar addition is available upstream.
+Every operation on a secret scalar is constant time, including the additive
+key derivation behind BIP32 children and Taproot tweaks. That was not true
+at first: those went through arbitrary-precision arithmetic, and GMP
+branches on limb counts. The fix was to expose the scalar addition and
+negation that `mirage-crypto-ec` already had internally, so no secret ever
+leaves the constant-time implementation.
 
 ## History and licensing
 

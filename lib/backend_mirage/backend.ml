@@ -36,7 +36,7 @@ let field_prime = z_to_be Bc.p
 
 (* A secret is defined by its octets; both library handles are views of the
    same 32 bytes, derived lazily. *)
-type secret = { s_octets : string; ec_priv : Ec.Dsa.priv Lazy.t; z : Z.t Lazy.t }
+type secret = { s_octets : string; ec_priv : Ec.Dsa.priv Lazy.t }
 
 and public = {
   p_sec1 : string; (* canonical 33-byte compressed form *)
@@ -54,7 +54,6 @@ let make_secret octets =
   {
     s_octets = octets;
     ec_priv = lazy (unreachable "priv_of_octets" (Ec.Dsa.priv_of_octets octets));
-    z = lazy (z_of_be octets);
   }
 
 let secret_of_octets octets =
@@ -114,12 +113,12 @@ let public_add a b =
   | Error _ as e -> e
   | Ok pt -> Ok (point_to_public pt)
 
+(* The field prime is odd, so y and p - y always differ in parity, and the
+   SEC1 prefix byte is exactly that parity. Negating a compressed point is
+   therefore just flipping the prefix -- no arithmetic at all. *)
 let public_negate p =
-  let pt = Lazy.force p.point in
-  let y' = Z.sub Bc.p pt.Bc.y in
-  (* Reconstruct through the SEC1 encoding: y and p - y differ only in parity. *)
-  let prefix = if Z.is_even y' then '\002' else '\003' in
-  make_public (String.init 33 (fun i -> if i = 0 then prefix else p.p_sec1.[i]))
+  let prefix = if p.p_sec1.[0] = '\002' then '\003' else '\002' in
+  make_public (String.mapi (fun i c -> if i = 0 then prefix else c) p.p_sec1)
 
 let public_add_tweak p t =
   match map_bc (Bc.scalar_of_octets t) with
@@ -132,18 +131,23 @@ let public_add_tweak p t =
           | Error _ as e -> e
           | Ok pt -> Ok (point_to_public pt)))
 
+(* Both of these are constant time, and deliberately do not go through
+   Zarith: GMP branches on limb counts, and these run on secret scalars
+   during BIP32 derivation and Taproot tweaking. *)
 let secret_add s t =
   if String.length t <> 32 then Error `Invalid_length
   else
-    let tz = z_of_be t in
-    if Z.sign tz <= 0 || Z.geq tz Bc.n then Error `Invalid_range
-    else
-      let sum = Z.erem (Z.add (Lazy.force s.z) tz) Bc.n in
-      if Z.sign sum = 0 then Error `Invalid_range else secret_of_octets (z_to_be sum)
+    match Ec.Dsa.priv_of_octets t with
+    (* Rejects a tweak of zero or at/above the order, which BIP32 and BIP341
+       both require the caller to treat as "try the next index". *)
+    | Error e -> Error (of_ec_error e)
+    | Ok tk -> (
+        match Ec.Dsa.add_scalar (Lazy.force s.ec_priv) tk with
+        | Error e -> Error (of_ec_error e)
+        | Ok sum -> Ok (make_secret (Ec.Dsa.priv_to_octets sum)))
 
 let secret_negate s =
-  let neg = Z.sub Bc.n (Lazy.force s.z) in
-  make_secret (z_to_be neg)
+  make_secret (Ec.Dsa.priv_to_octets (Ec.Dsa_bip340.negate_scalar (Lazy.force s.ec_priv)))
 
 (* --- ECDSA ------------------------------------------------------------- *)
 
@@ -154,7 +158,11 @@ let ecdsa_sign ~secret ~digest =
   let r, s = Ec.Dsa.sign ~key:(Lazy.force secret.ec_priv) digest in
   (* mirage-crypto-ec returns s as computed. Bitcoin requires the low
      variant (BIP62/BIP146): a high-s signature is valid but non-standard,
-     so Core will not relay it. Normalising here is not optional. *)
+     so Core will not relay it. Normalising here is not optional.
+
+     This is the one place a bignum still touches signing data, and it is
+     safe: s is the signature about to be published, so timing on it reveals
+     nothing that the signature itself does not. No secret reaches Zarith. *)
   let sz = z_of_be s in
   let s = if Z.gt sz half_order then z_to_be (Z.sub Bc.n sz) else s in
   (r, s)
