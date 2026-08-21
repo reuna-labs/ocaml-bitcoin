@@ -30,6 +30,9 @@ The project is also relicensed from LGPL-2.1 to ISC; see LICENSE.md.
   updater, signer, combiner, finalizer and extractor roles.
 * Worked examples under `examples/`, built and run by CI so they cannot
   drift out of date.
+* `unikernel/`, a MirageOS/Solo5 smoke test. The library cross-compiles to a
+  Solo5 binary that runs and produces results identical to the hosted build,
+  so the no-I/O property is checked rather than assumed.
 
 ### Removed
 

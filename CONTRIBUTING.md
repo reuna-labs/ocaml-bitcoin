@@ -3,8 +3,21 @@
 ## Building
 
 The two cryptographic dependencies are not yet on opam. Until they are,
-`bitcoin.opam.template` pins them via `pin-depends`, so a plain
+`bitcoin.opam.template` pins them via `pin-depends`, so
 `opam install --deps-only --with-test .` resolves them.
+
+**The pinned fork is currently private.** `reuna147/mirage-crypto` returns
+404 to an unauthenticated request, so those pins only resolve for someone
+who can already read it. Public CI cannot build this project until that
+repository is published or the needed parts are vendored here. Every CI job
+depends on it, not just the unikernel one.
+
+## The unikernel target
+
+`unikernel/` builds a Solo5 unikernel that links the library and exercises
+it, which is how the no-I/O claim is checked rather than assumed. It has
+been verified to produce a running binary; see `unikernel/README.md` for the
+exact toolchain versions and the two substitutions the build needs.
 
 ## Vendored code
 

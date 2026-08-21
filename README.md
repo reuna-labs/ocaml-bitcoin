@@ -4,7 +4,9 @@ Bitcoin primitives for OCaml: consensus serialization, keys and addresses,
 Bitcoin Script, transactions, sighash, Taproot, BIP32/BIP39, and PSBT.
 
 The core library performs no I/O and does not depend on `Unix`, so it builds
-unmodified as a [MirageOS](https://mirageos.org)/Solo5 unikernel.
+unmodified as a [MirageOS](https://mirageos.org)/Solo5 unikernel — verified,
+not asserted: `unikernel/` cross-compiles it to a Solo5 binary that runs and
+produces byte-identical results to the hosted build.
 
 > **Status: under development.** 4.0 is a ground-up rewrite and is not yet
 > released. The two cryptographic dependencies are not on opam either; see
@@ -64,6 +66,24 @@ underneath it.
 * **Constant-time where it counts.** Secret-key signing goes through
   `mirage-crypto-ec`'s fiat-crypto/ECCKiila secp256k1. See
   [Security](#security) for what that does and does not cover.
+
+## Unikernels
+
+`unikernel/` builds a Solo5 unikernel that links the library and exercises
+the hashing, curve, address and HD-wallet paths. Running it under
+`solo5-spt` gives:
+
+```
+Solo5: Bindings version v0.12.1
+[INFO] taproot address: bc1pm7y6q4mr04w6glx7l9eurqahm30mde797dk8fs5j94qfft2m2hhs7r45tv
+[INFO] ecdsa verified: true  schnorr verified: true
+[INFO] bip32 master xprv: xprv9s21ZrQH143K3GJpoapnV8SFfukcVBSfeCficPSGfubmSFDxo1kuHnLisriDvSnRRuL2Qrg5ggqHKNVpxR86QEC8w35uxmGoggxtQTPvfUu
+Solo5: solo5_exit(0) called
+```
+
+Identical to what the hosted build prints, on a different compiler and with
+no operating system underneath. Toolchain versions and the two workarounds
+the build needs are in [`unikernel/README.md`](unikernel/README.md).
 
 ## Supported
 
