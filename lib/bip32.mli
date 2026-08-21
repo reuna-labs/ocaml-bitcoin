@@ -43,6 +43,15 @@ module Public : sig
   (** Fails with [`Hardened_from_public] for an index at or above [2^31]. *)
 
   val derive_path : t -> Derivation_path.t -> (t, error) result
+
+  val to_octets : version:int32 -> t -> string
+  (** The 78-byte serialization, before Base58Check. The version is taken rather than a network
+      because it is what actually travels, and a PSBT or descriptor that carried a [tpub] has to
+      keep carrying one. *)
+
+  val of_octets : string -> (t * int32, error) result
+  (** Returns the key and the version bytes it was written with. *)
+
   val to_base58 : network:Network.t -> t -> string
   val of_base58 : string -> (t * Network.t list, error) result
 end
@@ -64,6 +73,8 @@ module Secret : sig
       [`Invalid_range] rather than silently moving on. *)
 
   val derive_path : t -> Derivation_path.t -> (t, error) result
+  val to_octets : version:int32 -> t -> string
+  val of_octets : string -> (t * int32, error) result
   val to_base58 : network:Network.t -> t -> string
   val of_base58 : string -> (t * Network.t list, error) result
 end

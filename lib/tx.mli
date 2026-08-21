@@ -72,11 +72,17 @@ val serialize : ?witness:bool -> t -> string
     section.
 
     Note a consequence of that encoding: because a [0x00] following the version is the SegWit
-    marker, a legacy transaction with no inputs cannot be represented. That is correct, and matches
-    consensus. *)
+    marker, a transaction with no inputs has no witness serialization. That is correct and matches
+    consensus; {!parse} accepts one in [~witness:false] mode, which is where such transactions
+    actually turn up. *)
 
-val parse : string -> (t, error) result
-val read : Codec.R.t -> t
+val parse : ?witness:bool -> string -> (t, error) result
+(** [witness] defaults to [true]: a [0x00] following the version is read as the BIP144 marker. Pass
+    [~witness:false] for a strictly legacy serialization, where that byte is an ordinary input count
+    -- which is how a transaction with no inputs becomes representable, and is the mode a PSBT's
+    unsigned transaction is read in. *)
+
+val read : ?witness:bool -> Codec.R.t -> t
 val write : ?witness:bool -> Codec.W.t -> t -> unit
 
 (** {1 Identity} *)

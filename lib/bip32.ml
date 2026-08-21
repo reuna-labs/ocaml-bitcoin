@@ -96,29 +96,36 @@ module Public = struct
       (fun acc i -> match acc with Error _ as e -> e | Ok t -> derive t i)
       (Ok t) (Derivation_path.to_list path)
 
+  let to_octets ~version t =
+    Codec.W.to_string
+      (fun w () ->
+        write_extended w ~version ~depth:t.depth ~parent_fingerprint:t.parent_fingerprint
+          ~child_number:t.child_number ~chain_code:t.chain_code
+          ~key_data:(Key.Public.to_octets ~compress:true t.key))
+      ()
+
+  let of_octets raw =
+    match parse_extended raw with
+    | Error _ as e -> e
+    | Ok (version, depth, parent_fingerprint, child_number, chain_code, key_data) -> (
+        (* Must be a compressed point. A 0x00 prefix here is a private key
+           wearing a public version, which is one of BIP32 vector 5's cases. *)
+        match Key.Public.of_octets key_data with
+        | Error e -> Error (of_key_error e)
+        | Ok key -> Ok ({ key; chain_code; depth; parent_fingerprint; child_number }, version))
+
   let to_base58 ~network t =
-    Base58.encode_check
-      (Codec.W.to_string
-         (fun w () ->
-           write_extended w ~version:(Network.bip32_public network) ~depth:t.depth
-             ~parent_fingerprint:t.parent_fingerprint ~child_number:t.child_number
-             ~chain_code:t.chain_code
-             ~key_data:(Key.Public.to_octets ~compress:true t.key))
-         ())
+    Base58.encode_check (to_octets ~version:(Network.bip32_public network) t)
 
   let of_base58 s =
     match Base58.decode_check s with
     | Error e -> Error (e :> error)
     | Ok raw -> (
-        match parse_extended raw with
+        match of_octets raw with
         | Error _ as e -> e
-        | Ok (version, depth, parent_fingerprint, child_number, chain_code, key_data) -> (
+        | Ok (t, version) -> (
             match Network.of_bip32_version version with
-            | Some (networks, `Public) -> (
-                match Key.Public.of_octets key_data with
-                | Error e -> Error (of_key_error e)
-                | Ok key ->
-                    Ok ({ key; chain_code; depth; parent_fingerprint; child_number }, networks))
+            | Some (networks, `Public) -> Ok (t, networks)
             | Some (_, `Private) | None -> Error `Invalid_version))
 end
 
@@ -189,30 +196,39 @@ module Secret = struct
       (fun acc i -> match acc with Error _ as e -> e | Ok t -> derive t i)
       (Ok t) (Derivation_path.to_list path)
 
+  let to_octets ~version t =
+    Codec.W.to_string
+      (fun w () ->
+        write_extended w ~version ~depth:t.depth ~parent_fingerprint:t.parent_fingerprint
+          ~child_number:t.child_number ~chain_code:t.chain_code
+          ~key_data:("\000" ^ Key.Secret.to_octets t.key))
+      ()
+
+  let of_octets raw =
+    match parse_extended raw with
+    | Error _ as e -> e
+    | Ok (version, depth, parent_fingerprint, child_number, chain_code, key_data) -> (
+        if
+          (* A private key is padded to 33 bytes with a leading zero; any other
+           prefix is one of BIP32 vector 5's forgeries. *)
+          key_data.[0] <> '\000'
+        then Error `Invalid_format
+        else
+          match Key.Secret.of_octets (String.sub key_data 1 32) with
+          | Error e -> Error (of_key_error e)
+          | Ok key -> Ok ({ key; chain_code; depth; parent_fingerprint; child_number }, version))
+
   let to_base58 ~network t =
-    Base58.encode_check
-      (Codec.W.to_string
-         (fun w () ->
-           write_extended w ~version:(Network.bip32_private network) ~depth:t.depth
-             ~parent_fingerprint:t.parent_fingerprint ~child_number:t.child_number
-             ~chain_code:t.chain_code
-             ~key_data:("\000" ^ Key.Secret.to_octets t.key))
-         ())
+    Base58.encode_check (to_octets ~version:(Network.bip32_private network) t)
 
   let of_base58 s =
     match Base58.decode_check s with
     | Error e -> Error (e :> error)
     | Ok raw -> (
-        match parse_extended raw with
+        match of_octets raw with
         | Error _ as e -> e
-        | Ok (version, depth, parent_fingerprint, child_number, chain_code, key_data) -> (
+        | Ok (t, version) -> (
             match Network.of_bip32_version version with
-            | Some (networks, `Private) -> (
-                if key_data.[0] <> '\000' then Error `Invalid_format
-                else
-                  match Key.Secret.of_octets (String.sub key_data 1 32) with
-                  | Error e -> Error (of_key_error e)
-                  | Ok key ->
-                      Ok ({ key; chain_code; depth; parent_fingerprint; child_number }, networks))
+            | Some (networks, `Private) -> Ok (t, networks)
             | Some (_, `Public) | None -> Error `Invalid_version))
 end

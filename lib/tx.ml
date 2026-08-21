@@ -98,12 +98,13 @@ let read_n r f n =
   let rec go acc i = if i = 0 then List.rev acc else go (f r :: acc) (i - 1) in
   go [] n
 
-let read r =
+let read ?(witness = true) r =
   let version = Codec.R.u32 r in
   let n_in = Codec.R.varint_int r in
-  if n_in = 0 then (
-    (* A zero input count is the BIP144 marker: no valid legacy transaction
-       has no inputs, which is what makes the encoding unambiguous. *)
+  if n_in = 0 && witness then (
+    (* A zero input count is the BIP144 marker. No transaction with inputs
+       starts this way, which is what makes the encoding unambiguous; in
+       [~witness:false] mode it is simply a count of zero. *)
     let flags = Codec.R.u8 r in
     if flags = 0 then Codec.R.fail (`Msg "transaction: witness flag must be non-zero");
     let n_in = Codec.R.varint_int r in
@@ -128,7 +129,7 @@ let read r =
     let lock_time = Codec.R.u32 r in
     { version; inputs; outputs; lock_time }
 
-let parse s = Codec.R.run read s
+let parse ?witness s = Codec.R.run (read ?witness) s
 let txid t = Hash.sha256d (serialize ~witness:false t)
 let wtxid t = Hash.sha256d (serialize ~witness:true t)
 let txid_hex t = Outpoint.reverse_hex (txid t)

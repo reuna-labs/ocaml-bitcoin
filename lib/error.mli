@@ -22,6 +22,9 @@ type t =
   | `Not_in_tree  (** a leaf that the output being spent does not commit to *)
   | `Prevout_mismatch  (** a prevout list that does not match the transaction's inputs *)
   | `Hardened_from_public  (** a hardened BIP32 child asked of an extended public key *)
+  | `Duplicate_key  (** the same key twice in one PSBT map *)
+  | `Unsupported_version  (** a format version this library does not implement, such as PSBT v2 *)
+  | `Incomplete  (** a PSBT that does not yet carry what the requested role needs *)
   | `Msg of string ]
 
 val pp : Format.formatter -> [< t ] -> unit

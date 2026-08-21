@@ -16,6 +16,9 @@ type t =
   | `Not_in_tree
   | `Prevout_mismatch
   | `Hardened_from_public
+  | `Duplicate_key
+  | `Unsupported_version
+  | `Incomplete
   | `Msg of string ]
 
 let pp ppf (e : [< t ]) =
@@ -42,6 +45,9 @@ let pp ppf (e : [< t ]) =
       Format.pp_print_string ppf "prevout list does not match the transaction's inputs"
   | `Hardened_from_public ->
       Format.pp_print_string ppf "a hardened child cannot be derived from an extended public key"
+  | `Duplicate_key -> Format.pp_print_string ppf "duplicate key in a PSBT map"
+  | `Unsupported_version -> Format.pp_print_string ppf "unsupported format version"
+  | `Incomplete -> Format.pp_print_string ppf "incomplete: missing data the operation requires"
   | `Msg m -> Format.pp_print_string ppf m
 
 let to_string e = Format.asprintf "%a" pp e

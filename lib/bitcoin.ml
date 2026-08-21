@@ -46,3 +46,7 @@ module Sighash = Sighash
 module Derivation_path = Derivation_path
 module Bip32 = Bip32
 module Bip39 = Bip39
+
+(** {1 Partially signed transactions} *)
+
+module Psbt = Psbt
