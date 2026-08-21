@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [master, "rewrite/**"]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ocaml-compiler: ["4.14", "5.1", "5.2", "5.3"]
+        include:
+          - os: macos-latest
+            ocaml-compiler: "5.3"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+      # The crypto dependencies are not yet on opam; bitcoin.opam.template
+      # pins them by commit sha, which opam honours here.
+      - run: opam install --deps-only --with-test .
+      - run: opam exec -- dune build @all
+      - run: opam exec -- dune runtest
+
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.3"
+      # Exactly the version named in .ocamlformat, or the check is meaningless.
+      - run: opam install ocamlformat.0.27.0
+      - run: opam exec -- dune build @fmt
+
+  unix-free:
+    # The core library must build inside a unikernel, where none of this
+    # exists. Cheap to check, and it keeps working while the solo5 job is red.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: reject I/O and platform dependencies under lib/
+        run: |
+          set -e
+          ! grep -rnE '\b(Unix|Thread|Lwt|Async|Mutex|Domain)\.' lib/
+          ! grep -rnE '\b(open_in|open_out|Sys\.(command|argv|getenv)|Random\.self_init|print_endline|print_string)\b' lib/
+
+  solo5:
+    # The unikernel cross-build. Allowed to fail until it goes green, then
+    # this flag comes off and it becomes required.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "4.14"
+      - run: opam install "ocaml-solo5>=0.8.1"
+      - run: opam install --deps-only .
+      - run: opam exec -- dune build -x solo5 @install
+
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.3"
+      - run: opam install --deps-only --with-doc .
+      - run: opam install odoc
+      - run: opam exec -- dune build @doc
