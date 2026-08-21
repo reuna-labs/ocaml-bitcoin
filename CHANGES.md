@@ -26,7 +26,10 @@ The project is also relicensed from LGPL-2.1 to ISC; see LICENSE.md.
 * Taproot: TapLeaf/TapBranch/TapTweak hashing, taptree construction,
   control blocks, output key derivation, key-path and script-path spends.
 * BIP32 hierarchical deterministic keys and BIP39 mnemonics (English).
-* PSBT: BIP174 version 0 with BIP371 Taproot fields.
+* PSBT: BIP174 version 0 with BIP371 Taproot fields, and the creator,
+  updater, signer, combiner, finalizer and extractor roles.
+* Worked examples under `examples/`, built and run by CI so they cannot
+  drift out of date.
 
 ### Removed
 

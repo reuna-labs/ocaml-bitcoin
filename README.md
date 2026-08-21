@@ -7,7 +7,38 @@ The core library performs no I/O and does not depend on `Unix`, so it builds
 unmodified as a [MirageOS](https://mirageos.org)/Solo5 unikernel.
 
 > **Status: under development.** 4.0 is a ground-up rewrite and is not yet
-> released. See [CHANGES.md](CHANGES.md).
+> released. The two cryptographic dependencies are not on opam either; see
+> [CONTRIBUTING.md](CONTRIBUTING.md) for the pins. See [CHANGES.md](CHANGES.md).
+
+## A transaction, end to end
+
+```ocaml
+open Bitcoin
+
+(* A wallet, from a BIP39 phrase down to a BIP86 Taproot key. *)
+let seed   = Result.get_ok (Bip39.to_seed (Bip39.normalize phrase))
+let master = Result.get_ok (Bip32.Secret.master seed)
+let path   = Result.get_ok (Derivation_path.of_string "m/86'/0'/0'/0/0")
+let node   = Result.get_ok (Bip32.Secret.derive_path master path)
+let si     = Result.get_ok (Taproot.spend_info
+                              ~internal_key:(Key.Secret.public node.key) ())
+
+(* bc1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr *)
+let address = Address.to_string ~network:Mainnet (Taproot.address si)
+
+(* Spend it: create, fund, sign, finalize, extract. *)
+let psbt = Result.get_ok (Psbt.Creator.create unsigned_tx)
+let psbt = Result.get_ok (Psbt.Updater.set_witness_utxo psbt ~input:0 prevout)
+let psbt = Result.get_ok (Psbt.Signer.sign_taproot_key_path psbt ~input:0 node.key ())
+let tx   = Result.get_ok (Psbt.Extractor.extract
+                            (Result.get_ok (Psbt.Finalizer.finalize psbt)))
+```
+
+Signing before the PSBT carries every input's amount and scriptPubKey is not
+an error you can make: BIP341 commits to all of them, so `Psbt.Signer` cannot
+build a digest until the transaction is complete, and says which input is
+missing. See [`examples/`](examples/) for the three worked cases, which CI
+builds and runs.
 
 ## Why
 
@@ -46,6 +77,13 @@ underneath it.
 | PSBT | 174 (v0), 371 (Taproot fields) |
 | Signature encoding | 62, 66, 146 (strict DER, low-S) |
 | Opt-in RBF | 125 |
+
+Verified against the specifications' own vectors, not just round-trip tests:
+all 19 BIP340 vectors, all 7 BIP341 scriptPubKey and key-path cases, all 4
+BIP32 vectors plus its 14 invalid-key cases, all 24 BIP39 vectors, all 30
+BIP174/BIP371 PSBTs (and all 31 invalid ones rejected), and from Bitcoin Core
+`sighash.json` in full, `tx_valid.json`, `key_io_valid.json` and
+`key_io_invalid.json`.
 
 ### Not implemented in 4.0, by design
 

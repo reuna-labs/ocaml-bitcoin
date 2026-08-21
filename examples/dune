@@ -1,0 +1,7 @@
+; Built by CI. The 3.0 examples rotted because they lived behind hand-written
+; Makefiles outside dune and referenced modules that had been renamed years
+; earlier; keeping them in the build is what stops that recurring.
+
+(executables
+ (names spend_p2wpkh taproot_tree psbt_flow)
+ (libraries bitcoin))
