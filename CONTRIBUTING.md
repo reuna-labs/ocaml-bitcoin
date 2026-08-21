@@ -6,6 +6,10 @@ The two cryptographic dependencies are not yet on opam. Until they are,
 `bitcoin.opam.template` pins them via `pin-depends`, so
 `opam install --deps-only --with-test .` resolves them.
 
+The pins name a specific commit, which must be one that carries
+`Dsa.add_scalar` and `Dsa_bip340.negate_scalar` — the library will not
+compile against a mirage-crypto-ec without them.
+
 **The pinned fork is currently private.** `reuna147/mirage-crypto` returns
 404 to an unauthenticated request, so those pins only resolve for someone
 who can already read it. Public CI cannot build this project until that

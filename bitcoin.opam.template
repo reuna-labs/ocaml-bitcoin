@@ -7,18 +7,18 @@
 pin-depends: [
   [
     "mirage-crypto.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
   ]
   [
     "mirage-crypto-rng.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
   ]
   [
     "mirage-crypto-ec.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
   ]
   [
     "mirage-crypto-blockchain.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#d9789a01a4ea6f7cae6125055965fca08c0641db"
+    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
   ]
 ]
