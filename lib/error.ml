@@ -12,6 +12,8 @@ type t =
   | `Wrong_hrp
   | `Not_on_curve
   | `At_infinity
+  | `Too_deep
+  | `Not_in_tree
   | `Msg of string ]
 
 let pp ppf (e : [< t ]) =
@@ -32,6 +34,8 @@ let pp ppf (e : [< t ]) =
   | `Wrong_hrp -> Format.pp_print_string ppf "address belongs to a different network"
   | `Not_on_curve -> Format.pp_print_string ppf "point is not on the curve"
   | `At_infinity -> Format.pp_print_string ppf "point at infinity"
+  | `Too_deep -> Format.pp_print_string ppf "script tree deeper than 128 levels"
+  | `Not_in_tree -> Format.pp_print_string ppf "leaf is not in this output's script tree"
   | `Msg m -> Format.pp_print_string ppf m
 
 let to_string e = Format.asprintf "%a" pp e

@@ -18,6 +18,8 @@ type t =
   | `Wrong_hrp  (** an address for a different network than the one asked for *)
   | `Not_on_curve
   | `At_infinity
+  | `Too_deep  (** a script tree deeper than BIP341 permits *)
+  | `Not_in_tree  (** a leaf that the output being spent does not commit to *)
   | `Msg of string ]
 
 val pp : Format.formatter -> [< t ] -> unit

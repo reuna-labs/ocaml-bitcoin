@@ -32,3 +32,7 @@ module Address = Address
 (** {1 Transactions} *)
 
 module Tx = Tx
+
+(** {1 Taproot} *)
+
+module Taproot = Taproot
