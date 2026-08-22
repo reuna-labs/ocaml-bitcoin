@@ -13,7 +13,7 @@
 (implicit_transitive_deps false)
 
 (source
- (github reuna147/ocaml-bitcoin))
+ (github reuna-labs/ocaml-bitcoin))
 
 (license ISC)
 
@@ -21,7 +21,7 @@
 
 (maintainers "Gil Bahat <bahat.gil@gmail.com>")
 
-(documentation "https://reuna147.github.io/ocaml-bitcoin/")
+(documentation "https://reuna-labs.github.io/ocaml-bitcoin/")
 
 (package
  (name bitcoin)

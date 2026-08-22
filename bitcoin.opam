@@ -15,9 +15,9 @@ maintainer: ["Gil Bahat <bahat.gil@gmail.com>"]
 authors: ["Gil Bahat <bahat.gil@gmail.com>"]
 license: "ISC"
 tags: ["bitcoin" "cryptocurrency" "taproot" "psbt" "segwit" "org:mirage"]
-homepage: "https://github.com/reuna147/ocaml-bitcoin"
-doc: "https://reuna147.github.io/ocaml-bitcoin/"
-bug-reports: "https://github.com/reuna147/ocaml-bitcoin/issues"
+homepage: "https://github.com/reuna-labs/ocaml-bitcoin"
+doc: "https://reuna-labs.github.io/ocaml-bitcoin/"
+bug-reports: "https://github.com/reuna-labs/ocaml-bitcoin/issues"
 depends: [
   "ocaml" {>= "4.14.0"}
   "dune" {>= "3.6" & >= "3.6"}
@@ -47,7 +47,7 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/reuna147/ocaml-bitcoin.git"
+dev-repo: "git+https://github.com/reuna-labs/ocaml-bitcoin.git"
 # DEVELOPMENT ONLY -- delete this file before submitting to opam-repository.
 #
 # `mirage-crypto-blockchain`, and the secp256k1/BIP340 support in
