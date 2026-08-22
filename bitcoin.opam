@@ -57,18 +57,25 @@ dev-repo: "git+https://github.com/reuna147/ocaml-bitcoin.git"
 pin-depends: [
   [
     "mirage-crypto.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#main"
   ]
   [
     "mirage-crypto-rng.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#main"
   ]
   [
     "mirage-crypto-ec.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#main"
   ]
   [
     "mirage-crypto-blockchain.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#main"
+  ]
+  # Not a direct dependency of this package: mirage-crypto-blockchain requires
+  # digestif >= 1.4.0, which exists only in the fork. Without this the solver
+  # reports an unsatisfiable digestif rather than a missing pin.
+  [
+    "digestif.1.4.0"
+    "git+https://github.com/reuna-labs/digestif.git#main"
   ]
 ]
