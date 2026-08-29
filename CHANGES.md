@@ -1,4 +1,4 @@
-## v4.0.0 (unreleased)
+## v4.0.0~alpha1 (unreleased)
 
 **This release is a complete rewrite. Nothing from 3.0 is retained.**
 

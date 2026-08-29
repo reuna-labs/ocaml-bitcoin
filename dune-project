@@ -2,6 +2,8 @@
 
 (name bitcoin)
 
+(version 4.0.0~alpha1)
+
 (generate_opam_files true)
 
 ; Careful: bitcoin.opam is generated from this file, but it also carries a
