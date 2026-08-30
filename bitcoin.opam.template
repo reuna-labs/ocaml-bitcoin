@@ -1,24 +1,32 @@
 # DEVELOPMENT ONLY -- delete this file before submitting to opam-repository.
 #
-# `mirage-crypto-blockchain`, and the secp256k1/BIP340 support in
-# `mirage-crypto-ec`, are not yet in opam. Until they are, these pins let
-# `opam install --deps-only --with-test .` resolve them. Shas, never
-# branches, so builds are reproducible.
+# `mirage-crypto-blockchain`, its lean core, and the secp256k1/BIP340 support
+# in `mirage-crypto-ec` are not yet in opam. Digestif 1.4 supplies the wider
+# Keccak family used by the blockchain package. Until those releases land,
+# these immutable private staging pins keep clean installs reproducible.
 pin-depends: [
   [
     "mirage-crypto.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#23379bd"
   ]
   [
     "mirage-crypto-rng.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#23379bd"
   ]
   [
     "mirage-crypto-ec.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#23379bd"
+  ]
+  [
+    "mirage-crypto-blockchain-core.2.4.0"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#23379bd"
   ]
   [
     "mirage-crypto-blockchain.2.4.0"
-    "git+https://github.com/reuna147/mirage-crypto.git#6af593272238ecab48607308ae0d24866d2f35e5"
+    "git+https://github.com/reuna-labs/mirage-crypto.git#23379bd"
+  ]
+  [
+    "digestif.1.4.0"
+    "git+https://github.com/reuna-labs/digestif.git#6b1530c"
   ]
 ]
