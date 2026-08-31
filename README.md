@@ -8,9 +8,20 @@ unmodified as a [MirageOS](https://mirageos.org)/Solo5 unikernel — verified,
 not asserted: `unikernel/` cross-compiles it to a Solo5 binary that runs and
 produces byte-identical results to the hosted build.
 
-> **Status: under development.** 4.0 is a ground-up rewrite and is not yet
-> released. The two cryptographic dependencies are not on opam either; see
-> [CONTRIBUTING.md](CONTRIBUTING.md) for the pins. See [CHANGES.md](CHANGES.md).
+> **Status: public, unaudited alpha.** `v4.0.0-alpha1` is published through
+> the Reuna opam repository. Do not use it to manage funds of value. See
+> [Security](#security) and [CHANGES.md](CHANGES.md).
+
+## Install
+
+```sh
+opam repository add reuna https://github.com/reuna-labs/opam-repository.git
+opam update
+opam install bitcoin.4.0.0~alpha1
+```
+
+The repository package uses immutable release archives and checksums; no path,
+git or private pins are needed.
 
 ## A transaction, end to end
 
@@ -118,7 +129,8 @@ required to build, sign and broadcast a transaction.
 ## Security
 
 This library has not been audited. Do not use it to manage funds you are
-unwilling to lose.
+unwilling to lose. Report vulnerabilities privately and review the trust
+boundary in [SECURITY.md](SECURITY.md).
 
 Signing uses `mirage-crypto-ec`'s constant-time secp256k1. Public-key
 arithmetic — which operates only on public data — uses a variable-time
