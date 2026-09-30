@@ -4,4 +4,4 @@
 
 (executables
  (names spend_p2wpkh taproot_tree psbt_flow)
- (libraries bitcoin))
+ (libraries bitcoin mirage-crypto-rng.unix))

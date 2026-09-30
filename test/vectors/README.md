@@ -45,3 +45,12 @@ Licence: MIT.
 The BIP173/BIP350 vectors are Python list literals rather than a data file,
 so they are transcribed mechanically into `test/bech32_vectors.ml` from
 `ref/python/tests.py`. That generated file should not be edited by hand.
+
+## BIP32 — complete vectors 1–5
+
+`bip32-test-vectors.json` transcribes all 17 valid extended-key pairs and
+all 16 invalid extended keys from `bitcoin/bips` commit
+`3a10b5b5f0a7586df8928d580a3009744ebb2079`, `bip-0032.mediawiki`.
+License: BSD-2-Clause. Checked 2026-09-30, including the two unknown-version
+cases omitted from the earlier fixture. Source:
+https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0032.mediawiki

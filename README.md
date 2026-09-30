@@ -75,7 +75,7 @@ underneath it.
   supplying all of them, and which remembers the transaction it was built
   for. Rules like this are encoded where possible rather than documented.
 * **Constant-time where it counts.** Secret-key signing goes through
-  `mirage-crypto-ec`'s fiat-crypto/ECCKiila secp256k1. See
+  `mirage-crypto-secp256k1`'s vendored Bitcoin Core libsecp256k1. See
   [Security](#security) for what that does and does not cover.
 
 ## Unikernels
@@ -132,16 +132,28 @@ This library has not been audited. Do not use it to manage funds you are
 unwilling to lose. Report vulnerabilities privately and review the trust
 boundary in [SECURITY.md](SECURITY.md).
 
-Signing uses `mirage-crypto-ec`'s constant-time secp256k1. Public-key
-arithmetic — which operates only on public data — uses a variable-time
-implementation, which is safe by construction.
+Secret scalar arithmetic, ECDSA and BIP340 use vendored Bitcoin Core
+libsecp256k1 through `mirage-crypto-secp256k1`. BIP32 sequencing uses the
+independent `mirage-crypto-bip32` package. Production dependencies contain
+no Zarith, GMP, ctypes, ScriptC or JavaScript runtime.
 
-Every operation on a secret scalar is constant time, including the additive
-key derivation behind BIP32 children and Taproot tweaks. That was not true
-at first: those went through arbitrary-precision arithmetic, and GMP
-branches on limb counts. The fix was to expose the scalar addition and
-negation that `mirage-crypto-ec` already had internally, so no secret ever
-leaves the constant-time implementation.
+Initialize Mirage's RNG before signing, deriving public keys or private
+BIP32 children: native contexts use fresh blinding randomness even when
+the output is deterministic. Unix applications can initialize
+`Mirage_crypto_rng_unix`; Mirage applications use `default_random`.
+Fixed seeds in the test suite are test-only entropy.
+
+The native secret arithmetic has upstream constant-time guarantees. The
+OCaml integration and BIP32 protocol layer have not independently been
+verified constant-time, and GC-managed secret copies cannot be guaranteed
+erased. Base58 formatting of private extended keys is outside that claim.
+Public-key operations may be variable-time.
+
+BIP32 derives exactly the requested index. Zero tweaks are accepted;
+invalid children and depth overflow return errors without automatic retry.
+Network versions, Base58Check and derivation-path syntax remain Bitcoin
+policy. Public extended-key records remain source compatible; malformed
+records are rejected when imported into the native BIP32 core.
 
 ## History and licensing
 

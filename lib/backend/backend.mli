@@ -1,14 +1,13 @@
 (** The secp256k1 operations this library needs, and nothing more.
 
-    This is a {e virtual} module: the implementation is chosen at link time. It is deliberately the
-    only place in the tree that names a cryptographic library, so that swapping one — or absorbing
-    an upstream rename — is a single-file change.
+    This is a {e virtual} module: the implementation is chosen at link time. Curve operations live
+    here; BIP32 protocol sequencing delegates separately to [Mirage_crypto_bip32].
 
     {1 Constant time}
 
     Implementations must perform every operation on a {!secret} in constant time with respect to
-    that secret, with one documented exception: {!secret_add}, whose modular addition may branch on
-    limb counts. See the security section of the project README.
+    that secret. The default native backend requires an initialized Mirage RNG for signing and
+    public-key derivation. See the security section of the project README.
 
     Operations on {!public} values act on public data and carry no such requirement.
 
@@ -45,7 +44,7 @@ val secret_equal : secret -> secret -> bool
 
 val secret_add : secret -> string -> (secret, error) result
 (** [secret_add d t] is [(d + t) mod n], where [t] is a 32-byte scalar. Returns [`Invalid_range] if
-    [t] is not in [\[1, n)] or if the sum is zero. This is BIP32's child key derivation and BIP341's
+    [t] is not in [\[0, n)] or if the sum is zero. This is BIP32's child key derivation and BIP341's
     key tweak. *)
 
 val secret_negate : secret -> secret

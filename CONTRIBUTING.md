@@ -2,19 +2,17 @@
 
 ## Building
 
-The two cryptographic dependencies are not yet on opam. Until they are,
-`bitcoin.opam.template` pins them via `pin-depends`, so
-`opam install --deps-only --with-test .` resolves them.
+The native secp256k1 and independent BIP32 packages are not yet on opam.
+`bitcoin.opam.template` pins the tested mirage-crypto fork revision through
+`pin-depends`; `opam install --deps-only --with-test .` uses those pins.
+All packages from that fork must use the same revision. Dune preserves the
+template when regenerating `bitcoin.opam`.
 
-The pins name a specific commit, which must be one that carries
-`Dsa.add_scalar` and `Dsa_bip340.negate_scalar` — the library will not
-compile against a mirage-crypto-ec without them.
-
-**The pinned fork is currently private.** `reuna147/mirage-crypto` returns
-404 to an unauthenticated request, so those pins only resolve for someone
-who can already read it. Public CI cannot build this project until that
-repository is published or the needed parts are vendored here. Every CI job
-depends on it, not just the unikernel one.
+The production closure is bignum-free. Do not reintroduce the full
+`mirage-crypto-blockchain`, `mirage-crypto-ec`, Zarith or GMP to implement
+Bitcoin curve operations. Run the full suite, including PSBT and Taproot,
+when changing the backend. The test runner initializes deterministic RNG
+entropy; applications must initialize a real entropy source.
 
 ## The unikernel target
 

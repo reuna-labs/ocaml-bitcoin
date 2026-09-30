@@ -10,6 +10,7 @@ let hex s =
 let ok = function Ok x -> x | Error e -> failwith (Error.to_string (e :> Error.t))
 
 let () =
+  Mirage_crypto_rng_unix.use_default ();
   (* A key. In practice this comes from a wallet; see psbt_flow.ml for the
      BIP39/BIP32 route. *)
   let secret = ok (Key.Secret.of_octets (Hash.sha256 "example key, do not use")) in

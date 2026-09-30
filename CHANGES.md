@@ -1,3 +1,15 @@
+## Unreleased
+
+- Move BIP32 to `mirage-crypto-bip32` and all default curve operations to
+  vendored libsecp256k1. Remove Zarith, GMP and the full blockchain/EC
+  packages from the production dependency closure.
+- Preserve BIP32 records, network/path policy and wire formats. Accept zero
+  tweaks; reject depth overflow and malformed records. Invalid children
+  return errors at the requested index without retry.
+- Signing, public-key derivation and private BIP32 derivation now require
+  an initialized Mirage RNG for native context blinding. Initialize it with
+  real entropy in applications; the examples and Mirage smoke do so.
+
 ## v4.0.0~alpha1 (unreleased)
 
 **This release is a complete rewrite. Nothing from 3.0 is retained.**

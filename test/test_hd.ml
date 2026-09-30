@@ -112,7 +112,7 @@ let bip32_invalid_keys () =
      as a private one. *)
   let open Yojson.Safe.Util in
   let cases = json "bip32-test-vectors.json" |> member "invalid" |> to_list in
-  check_int "invalid case count" 14 (List.length cases);
+  check_int "invalid case count" 16 (List.length cases);
   List.iter
     (fun c ->
       let key = c |> member "key" |> to_string in
@@ -148,6 +148,36 @@ let master_seed_bounds () =
   check_int "master depth" 0 m.Bip32.depth;
   check_int "master child number" 0 (Int32.to_int m.Bip32.child_number);
   check_hex "master has no parent" "00000000" m.Bip32.parent_fingerprint
+
+let bip32_record_boundaries () =
+  let master = ok (Bip32.Secret.master (String.make 16 '\001')) in
+  let reject t =
+    match Bip32.Secret.derive t 0l with
+    | Error _ -> ()
+    | Ok _ -> Alcotest.fail "malformed extended record accepted"
+  in
+  List.iter reject
+    [
+      { master with depth = -1 };
+      { master with depth = 256 };
+      { master with depth = 255 };
+      { master with chain_code = "" };
+      { master with parent_fingerprint = "" };
+      { master with parent_fingerprint = String.make 4 '\001' };
+      { master with child_number = 1l };
+    ];
+  let public = Bip32.Secret.public master in
+  (match Bip32.Public.derive { public with depth = 255 } 0l with
+  | Error `Invalid_range -> ()
+  | _ -> Alcotest.fail "public depth overflow accepted");
+  let version = 0xdeadbeefl in
+  let raw = Bip32.Secret.to_octets ~version master in
+  let imported, actual = ok (Bip32.Secret.of_octets raw) in
+  check_bool "raw version preserved" true (actual = version);
+  check_bool "unknown version roundtrip" true (Bip32.Secret.to_octets ~version imported = raw);
+  match Bip32.Secret.of_base58 (Base58.encode_check raw) with
+  | Error `Invalid_version -> ()
+  | _ -> Alcotest.fail "unknown wallet version accepted"
 
 let fingerprints () =
   let master = ok (Bip32.Secret.master (hex "000102030405060708090a0b0c0d0e0f")) in
@@ -282,6 +312,7 @@ let suite =
         Alcotest.test_case "hardened needs the private key" `Quick hardened_needs_private;
         Alcotest.test_case "master seed bounds" `Quick master_seed_bounds;
         Alcotest.test_case "fingerprints" `Quick fingerprints;
+        Alcotest.test_case "record boundaries and version policy" `Quick bip32_record_boundaries;
       ] );
     ( "bip39",
       [

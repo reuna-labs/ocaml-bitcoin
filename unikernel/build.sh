@@ -20,7 +20,7 @@ mkdir -p duniverse/ocaml-bitcoin
 cp -r "$root/lib" "$root/bip39" "$root/dune-project" "$root/bitcoin.opam" \
       duniverse/ocaml-bitcoin/
 
-# Upstream mirage-crypto has neither secp256k1 nor the blockchain package.
+# Upstream mirage-crypto has neither the native secp256k1 nor independent BIP32 package.
 rm -rf duniverse/mirage-crypto
 cp -r "$MIRAGE_CRYPTO" duniverse/mirage-crypto
 rm -rf duniverse/mirage-crypto/.git duniverse/mirage-crypto/_build \

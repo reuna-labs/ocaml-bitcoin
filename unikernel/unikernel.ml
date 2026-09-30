@@ -14,6 +14,7 @@ module Main = struct
     let verified = Key.Ecdsa.verify ~key:public sg ~digest in
     let schnorr = Key.Schnorr.sign ~key:secret ~msg:digest () in
     let sverified = Key.Schnorr.verify ~x_only:(Key.Public.x_only public) schnorr ~msg:digest in
+    assert (verified && sverified);
     let seed =
       ok
         (Bip39.to_seed

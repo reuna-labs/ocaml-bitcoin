@@ -27,9 +27,9 @@ by inspection.
     make depends                   # vendors every dependency into duniverse/
     make build
 
-`make depends` needs the `overlays` repository because Zarith is not built
-with dune upstream and so cannot be vendored; the overlay provides
-`zarith.1.14+dune+mirage`. GMP is vendored and cross-compiled alongside it.
+The Bitcoin production closure no longer needs a Zarith overlay or GMP.
+`config.ml` explicitly enables Mirage's `default_random`, which initializes
+the RNG used for native secp256k1 context blinding before application startup.
 
 ## Two things that will bite
 
@@ -39,8 +39,8 @@ which depends on `unix`, which does not exist in a unikernel — so the build
 fails on a library this project no longer contains. Until the opam name is
 taken over, replace `duniverse/ocaml-bitcoin` with this working tree.
 
-`mirage-crypto-blockchain` and the secp256k1 support in `mirage-crypto-ec`
-live only in a fork that is not public, so `duniverse/mirage-crypto` has to
+`mirage-crypto-bip32` and `mirage-crypto-secp256k1`
+live in the development fork, so `duniverse/mirage-crypto` has to
 be replaced with a checkout of it as well. See `../CONTRIBUTING.md`.
 
 `build.sh` does both substitutions and is what the numbers above were

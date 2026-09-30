@@ -10,6 +10,7 @@ let hex s =
 let ok = function Ok x -> x | Error e -> failwith (Error.to_string (e :> Error.t))
 
 let () =
+  Mirage_crypto_rng_unix.use_default ();
   let key name = ok (Key.Secret.of_octets (Hash.sha256 name)) in
   let internal = key "internal" in
   let alice = Key.Secret.public (key "alice") in

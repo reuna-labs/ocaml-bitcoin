@@ -1,3 +1,10 @@
+(** BIP32 uses the lean Mirage native core. Private derivation, neutering and fingerprints require
+    an initialized Mirage RNG for context blinding. Derivation uses the requested index without
+    retry; zero tweaks are valid. Depth overflow and invalid children return [Invalid_range].
+    Caller-constructed records are validated on import. For malformed records, result-returning
+    functions return an error; serialization, fingerprints and neutering raise [Invalid_argument].
+*)
+
 (** BIP32 hierarchical deterministic keys.
 
     An extended key is a key plus a 32-byte chain code, so that children can be derived

@@ -19,100 +19,74 @@ type 'a extended = {
   child_number : int32;
 }
 
-let hmac512 ~key data = Digestif.SHA512.(to_raw_string (hmac_string ~key data))
-let zero_fingerprint = String.make 4 '\000'
+module Native = Mirage_crypto_bip32
+module K = Mirage_crypto_secp256k1
 
-let of_key_error : Key.error -> error = function
-  | ( `Invalid_length | `Invalid_range | `Invalid_format | `Invalid_checksum | `Not_on_curve
-    | `At_infinity | `Msg _ ) as e ->
-      e
-  | `Wrong_hrp -> `Msg "unexpected key error in derivation"
+let lift r = Result.map_error (fun (e : Native.error) -> (e :> error)) r
 
-(* The 78-byte serialization shared by both kinds, before Base58Check. *)
-let write_extended w ~version ~depth ~parent_fingerprint ~child_number ~chain_code ~key_data =
-  Codec.W.u32_be w version;
-  Codec.W.u8 w depth;
-  Codec.W.bytes w parent_fingerprint;
-  Codec.W.u32_be w child_number;
-  Codec.W.bytes w chain_code;
-  Codec.W.bytes w key_data
+let key_result r =
+  Result.map_error
+    (fun (e : Key.error) ->
+      match e with
+      | `Wrong_hrp -> `Msg "unexpected key error in BIP32"
+      | ( `Invalid_length | `Invalid_range | `Invalid_format | `Invalid_checksum | `Not_on_curve
+        | `At_infinity | `Msg _ ) as e ->
+          e)
+    r
 
-let parse_extended s =
-  if String.length s <> 78 then Error `Invalid_length
+let import key (n : _ Native.extended) =
+  Result.map
+    (fun key ->
+      {
+        key;
+        chain_code = n.chain_code;
+        depth = n.depth;
+        parent_fingerprint = n.parent_fingerprint;
+        child_number = n.child_number;
+      })
+    key
+
+let encode ~version key t =
+  if t.depth < 0 || t.depth > 255 then Error `Invalid_range
+  else if String.length t.chain_code <> 32 || String.length t.parent_fingerprint <> 4 then
+    Error `Invalid_length
   else
-    let version = ref 0l in
-    for i = 0 to 3 do
-      version := Int32.logor (Int32.shift_left !version 8) (Int32.of_int (Char.code s.[i]))
-    done;
-    let depth = Char.code s.[4] in
-    let parent_fingerprint = String.sub s 5 4 in
-    let child_number =
-      let v = ref 0l in
-      for i = 9 to 12 do
-        v := Int32.logor (Int32.shift_left !v 8) (Int32.of_int (Char.code s.[i]))
-      done;
-      !v
-    in
-    let chain_code = String.sub s 13 32 in
-    let key_data = String.sub s 45 33 in
-    (* A master key has depth zero, so it can have neither a parent nor an
-       index; anything else is a malformed or forged key. *)
-    if depth = 0 && not (String.equal parent_fingerprint zero_fingerprint) then
-      Error `Invalid_format
-    else if depth = 0 && not (Int32.equal child_number 0l) then Error `Invalid_format
-    else Ok (!version, depth, parent_fingerprint, child_number, chain_code, key_data)
+    let b = Bytes.create 78 in
+    Bytes.set_int32_be b 0 version;
+    Bytes.set b 4 (Char.chr t.depth);
+    Bytes.blit_string t.parent_fingerprint 0 b 5 4;
+    Bytes.set_int32_be b 9 t.child_number;
+    Bytes.blit_string t.chain_code 0 b 13 32;
+    Bytes.blit_string key 0 b 45 33;
+    Ok (Bytes.to_string b)
+
+let unwrap = function Ok x -> x | Error _ -> invalid_arg "Bitcoin.Bip32: malformed extended key"
 
 module Public = struct
   type t = Key.Public.t extended
 
-  let fingerprint t = String.sub (Key.Public.hash160 t.key) 0 4
-
-  let derive t i =
-    if Derivation_path.is_hardened i then Error `Hardened_from_public
-    else
-      let data =
-        Codec.W.to_string
-          (fun w () ->
-            Codec.W.bytes w (Key.Public.to_octets ~compress:true t.key);
-            Codec.W.u32_be w i)
-          ()
-      in
-      let hash = hmac512 ~key:t.chain_code data in
-      let il = String.sub hash 0 32 and ir = String.sub hash 32 32 in
-      match Key.Public.add_tweak t.key il with
-      | Error e -> Error (of_key_error e)
-      | Ok key ->
-          Ok
-            {
-              key;
-              chain_code = ir;
-              depth = t.depth + 1;
-              parent_fingerprint = fingerprint t;
-              child_number = i;
-            }
-
-  let derive_path t path =
-    List.fold_left
-      (fun acc i -> match acc with Error _ as e -> e | Ok t -> derive t i)
-      (Ok t) (Derivation_path.to_list path)
-
-  let to_octets ~version t =
-    Codec.W.to_string
-      (fun w () ->
-        write_extended w ~version ~depth:t.depth ~parent_fingerprint:t.parent_fingerprint
-          ~child_number:t.child_number ~chain_code:t.chain_code
-          ~key_data:(Key.Public.to_octets ~compress:true t.key))
-      ()
+  let from_native n = import (key_result (Key.Public.of_octets (K.pub_to_octets n.Native.key))) n
 
   let of_octets raw =
-    match parse_extended raw with
-    | Error _ as e -> e
-    | Ok (version, depth, parent_fingerprint, child_number, chain_code, key_data) -> (
-        (* Must be a compressed point. A 0x00 prefix here is a private key
-           wearing a public version, which is one of BIP32 vector 5's cases. *)
-        match Key.Public.of_octets key_data with
-        | Error e -> Error (of_key_error e)
-        | Ok key -> Ok ({ key; chain_code; depth; parent_fingerprint; child_number }, version))
+    Result.bind
+      (lift (Native.Public.of_octets raw))
+      (fun (n, version) -> Result.map (fun t -> (t, version)) (from_native n))
+
+  let to_native t =
+    Result.bind
+      (encode ~version:0l (Key.Public.to_octets ~compress:true t.key) t)
+      (fun raw -> Result.map fst (lift (Native.Public.of_octets raw)))
+
+  let to_octets ~version t = Native.Public.to_octets ~version (unwrap (to_native t))
+
+  let derive t i =
+    Result.bind (to_native t) (fun n -> Result.bind (lift (Native.Public.derive n i)) from_native)
+
+  let derive_path t path =
+    Result.bind (to_native t) (fun n ->
+        Result.bind (lift (Native.Public.derive_path n (Derivation_path.to_list path))) from_native)
+
+  let fingerprint t = Native.Public.fingerprint (unwrap (to_native t))
 
   let to_base58 ~network t =
     Base58.encode_check (to_octets ~version:(Network.bip32_public network) t)
@@ -132,91 +106,30 @@ end
 module Secret = struct
   type t = Key.Secret.t extended
 
-  let public t =
-    {
-      key = Key.Secret.public t.key;
-      chain_code = t.chain_code;
-      depth = t.depth;
-      parent_fingerprint = t.parent_fingerprint;
-      child_number = t.child_number;
-    }
-
-  let fingerprint t = Public.fingerprint (public t)
-
-  let master seed =
-    let n = String.length seed in
-    if n < 16 || n > 64 then Error `Invalid_length
-    else
-      let hash = hmac512 ~key:"Bitcoin seed" seed in
-      let il = String.sub hash 0 32 and ir = String.sub hash 32 32 in
-      match Key.Secret.of_octets il with
-      | Error _ ->
-          (* BIP32: if the key is zero or beyond the curve order the seed is
-           invalid. It says to pick another seed, not to adjust this one. *)
-          Error `Invalid_range
-      | Ok key ->
-          Ok
-            {
-              key;
-              chain_code = ir;
-              depth = 0;
-              parent_fingerprint = zero_fingerprint;
-              child_number = 0l;
-            }
-
-  let derive t i =
-    let data =
-      Codec.W.to_string
-        (fun w () ->
-          if Derivation_path.is_hardened i then (
-            (* Hardened derivation feeds the private key, which is why it
-               cannot be done from an extended public key. *)
-            Codec.W.u8 w 0x00;
-            Codec.W.bytes w (Key.Secret.to_octets t.key))
-          else Codec.W.bytes w (Key.Public.to_octets ~compress:true (Key.Secret.public t.key));
-          Codec.W.u32_be w i)
-        ()
-    in
-    let hash = hmac512 ~key:t.chain_code data in
-    let il = String.sub hash 0 32 and ir = String.sub hash 32 32 in
-    match Key.Secret.add_tweak t.key il with
-    | Error e -> Error (of_key_error e)
-    | Ok key ->
-        Ok
-          {
-            key;
-            chain_code = ir;
-            depth = t.depth + 1;
-            parent_fingerprint = fingerprint t;
-            child_number = i;
-          }
-
-  let derive_path t path =
-    List.fold_left
-      (fun acc i -> match acc with Error _ as e -> e | Ok t -> derive t i)
-      (Ok t) (Derivation_path.to_list path)
-
-  let to_octets ~version t =
-    Codec.W.to_string
-      (fun w () ->
-        write_extended w ~version ~depth:t.depth ~parent_fingerprint:t.parent_fingerprint
-          ~child_number:t.child_number ~chain_code:t.chain_code
-          ~key_data:("\000" ^ Key.Secret.to_octets t.key))
-      ()
+  let from_native n = import (key_result (Key.Secret.of_octets (K.priv_to_octets n.Native.key))) n
 
   let of_octets raw =
-    match parse_extended raw with
-    | Error _ as e -> e
-    | Ok (version, depth, parent_fingerprint, child_number, chain_code, key_data) -> (
-        if
-          (* A private key is padded to 33 bytes with a leading zero; any other
-           prefix is one of BIP32 vector 5's forgeries. *)
-          key_data.[0] <> '\000'
-        then Error `Invalid_format
-        else
-          match Key.Secret.of_octets (String.sub key_data 1 32) with
-          | Error e -> Error (of_key_error e)
-          | Ok key -> Ok ({ key; chain_code; depth; parent_fingerprint; child_number }, version))
+    Result.bind
+      (lift (Native.Secret.of_octets raw))
+      (fun (n, version) -> Result.map (fun t -> (t, version)) (from_native n))
+
+  let to_native t =
+    Result.bind
+      (encode ~version:0l ("\000" ^ Key.Secret.to_octets t.key) t)
+      (fun raw -> Result.map fst (lift (Native.Secret.of_octets raw)))
+
+  let to_octets ~version t = Native.Secret.to_octets ~version (unwrap (to_native t))
+
+  let derive t i =
+    Result.bind (to_native t) (fun n -> Result.bind (lift (Native.Secret.derive n i)) from_native)
+
+  let derive_path t path =
+    Result.bind (to_native t) (fun n ->
+        Result.bind (lift (Native.Secret.derive_path n (Derivation_path.to_list path))) from_native)
+
+  let master seed = Result.bind (lift (Native.Secret.master seed)) from_native
+  let public t = unwrap (Public.from_native (Native.Secret.public (unwrap (to_native t))))
+  let fingerprint t = Native.Secret.fingerprint (unwrap (to_native t))
 
   let to_base58 ~network t =
     Base58.encode_check (to_octets ~version:(Network.bip32_private network) t)

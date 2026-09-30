@@ -65,11 +65,11 @@ jobs:
           # ocaml-solo5 pins an exact compiler per release; 1.3.3 wants this
           # one. Pairing it with 4.14 does not resolve.
           ocaml-compiler: "5.4.1"
-      # Zarith is not built with dune upstream and so cannot be vendored by
-      # opam-monorepo; the overlay provides zarith.1.14+dune+mirage.
+      # Mirage dependency overlays; Bitcoin itself needs no Zarith/GMP overlay.
       - run: opam repository add overlays https://github.com/dune-universe/opam-overlays.git
       - run: opam install ocaml-solo5 mirage opam-monorepo
-      - run: git clone --depth 1 https://github.com/reuna147/mirage-crypto.git ../mirage-crypto
+      - run: git clone https://github.com/reuna-labs/mirage-crypto.git ../mirage-crypto
+      - run: git -C ../mirage-crypto checkout 2bbb759fdc6463aa8468ccaf0b06244de1244497
       - run: MIRAGE_CRYPTO=$(cd ../mirage-crypto && pwd) opam exec -- ./unikernel/build.sh hvt
 
   doc:

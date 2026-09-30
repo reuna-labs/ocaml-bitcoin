@@ -91,7 +91,17 @@ let tweaking () =
   in
   check_bool "adding t then -t is the identity" true
     (B.secret_equal d (ok (B.secret_add d' n_minus_t)));
-  is_error "tweak of zero" (B.secret_add d (String.make 32 '\000'));
+  Alcotest.(check bool)
+    "zero tweak preserves public" true
+    (let p = B.public_of_secret d in
+     match B.public_add_tweak p (String.make 32 '\000') with
+     | Ok x -> B.public_equal p x
+     | Error _ -> false);
+  Alcotest.(check bool)
+    "zero tweak preserves secret" true
+    (match B.secret_add d (String.make 32 '\000') with
+    | Ok x -> B.secret_equal d x
+    | Error _ -> false);
   is_error "tweak at or above n" (B.secret_add d B.order);
   is_error "tweak of the wrong length" (B.secret_add d (String.make 31 '\001'))
 
@@ -199,7 +209,8 @@ let prop_pubkey_backends_agree =
      through mirage-crypto-ec's constant-time base multiplication, while
      point arithmetic runs through mirage-crypto-blockchain. If the two ever
      disagree about what d*G is, everything above silently breaks. *)
-  QCheck2.Test.make ~count:300 ~name:"secp256k1: both backends agree on d*G" gen_secret (fun d ->
+  QCheck2.Test.make ~count:300 ~name:"secp256k1: public key serialization agrees on d*G" gen_secret
+    (fun d ->
       let p = B.public_of_secret d in
       let sec1 = B.public_to_octets ~compress:true p in
       (* Round-tripping through the point backend must be a no-op. *)

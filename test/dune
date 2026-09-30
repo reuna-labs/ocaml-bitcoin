@@ -3,6 +3,7 @@
  (libraries
   bitcoin
   bitcoin.backend
+  mirage-crypto-rng
   alcotest
   qcheck-core
   qcheck-alcotest

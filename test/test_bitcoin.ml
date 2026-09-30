@@ -1,3 +1,8 @@
+(* Deterministic test entropy only; applications must initialize a real RNG. *)
+let () =
+  Mirage_crypto_rng.set_default_generator
+    (Mirage_crypto_rng.create ~seed:(String.make 48 '\042') (module Mirage_crypto_rng.Fortuna))
+
 open Bitcoin
 open Testutil
 

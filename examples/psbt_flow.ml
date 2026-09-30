@@ -11,6 +11,7 @@ let hex s =
 let ok = function Ok x -> x | Error e -> failwith (Error.to_string (e :> Error.t))
 
 let () =
+  Mirage_crypto_rng_unix.use_default ();
   (* A wallet: BIP39 phrase, BIP32 tree, BIP86 Taproot account. *)
   let words =
     Bip39.normalize

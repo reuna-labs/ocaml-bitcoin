@@ -6,11 +6,7 @@
 
 (generate_opam_files true)
 
-; Careful: bitcoin.opam is generated from this file, but it also carries a
-; hand-maintained `pin-depends:` block that dune cannot express (see
-; ocaml-cometbft, which gave up on generation for the same reason). Regenerating
-; drops it, and the drop is silent -- the package still solves, just against
-; released mirage-crypto instead of the fork. Re-add it after any regeneration.
+; Development pins are preserved through bitcoin.opam.template.
 
 (implicit_transitive_deps false)
 
@@ -38,17 +34,15 @@
    (>= 4.14.0))
   (dune
    (>= 3.6))
-  (zarith
-   (>= 1.13))
+  eqaf
   (digestif
    (>= 1.2.0))
   (base64
    (>= 3.5.0))
-  (mirage-crypto-ec
-   (>= 2.1.0))
+  mirage-crypto-secp256k1
   (mirage-crypto-rng
    (>= 2.1.0))
-  mirage-crypto-blockchain
+  mirage-crypto-bip32
   (alcotest :with-test)
   (qcheck-alcotest :with-test)
   (ohex
