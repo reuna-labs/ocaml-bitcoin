@@ -85,29 +85,9 @@ let to_entropy words =
 
 let check words = match to_entropy words with Ok _ -> true | Error _ -> false
 
-(* PBKDF2-HMAC-SHA512. BIP39 fixes the iteration count at 2048 and the
-   output at 64 bytes, so this is the whole of it. *)
-let pbkdf2_sha512 ~password ~salt ~iterations ~dk_len =
-  let hlen = 64 in
-  let blocks = (dk_len + hlen - 1) / hlen in
-  let buf = Buffer.create (blocks * hlen) in
-  for i = 1 to blocks do
-    let block_index = String.init 4 (fun k -> Char.chr ((i lsr (8 * (3 - k))) land 0xff)) in
-    let u = ref Digestif.SHA512.(to_raw_string (hmac_string ~key:password (salt ^ block_index))) in
-    let acc = Bytes.of_string !u in
-    for _ = 2 to iterations do
-      (u := Digestif.SHA512.(to_raw_string (hmac_string ~key:password !u)));
-      for k = 0 to hlen - 1 do
-        Bytes.set acc k (Char.chr (Char.code (Bytes.get acc k) lxor Char.code !u.[k]))
-      done
-    done;
-    Buffer.add_bytes buf acc
-  done;
-  String.sub (Buffer.contents buf) 0 dk_len
-
 let seed_of_words ?(passphrase = "") words =
-  pbkdf2_sha512 ~password:(String.concat " " words) ~salt:("mnemonic" ^ passphrase) ~iterations:2048
-    ~dk_len:64
+  Mirage_crypto_pbkdf2.sha512 ~password:(String.concat " " words) ~salt:("mnemonic" ^ passphrase) ~iterations:2048
+    ~length:64
 
 let to_seed_unchecked ?passphrase words = seed_of_words ?passphrase words
 

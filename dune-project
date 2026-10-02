@@ -42,6 +42,7 @@
   mirage-crypto-secp256k1
   (mirage-crypto-rng
    (>= 2.1.0))
+  mirage-crypto-pbkdf2
   mirage-crypto-bip32
   (alcotest :with-test)
   (qcheck-alcotest :with-test)

@@ -27,6 +27,7 @@ depends: [
   "base64" {>= "3.5.0"}
   "mirage-crypto-secp256k1"
   "mirage-crypto-rng" {>= "2.1.0"}
+  "mirage-crypto-pbkdf2"
   "mirage-crypto-bip32"
   "alcotest" {with-test}
   "qcheck-alcotest" {with-test}
@@ -49,13 +50,13 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/reuna-labs/ocaml-bitcoin.git"
-# DEVELOPMENT ONLY -- delete this file before submitting to opam-repository.
-# Independent native secp256k1 and BIP32 packages, pinned to the tested revision.
-# Keep every Mirage crypto package at the same revision/version.
+# Development pins for the coordinated native crypto source.
+# Pins select versions; optional packages are installed only when required.
 pin-depends: [
-  [ "mirage-crypto.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#2bbb759fdc6463aa8468ccaf0b06244de1244497" ]
-  [ "mirage-crypto-rng.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#2bbb759fdc6463aa8468ccaf0b06244de1244497" ]
-  [ "mirage-crypto-secp256k1.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#2bbb759fdc6463aa8468ccaf0b06244de1244497" ]
-  [ "mirage-crypto-bip32.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#2bbb759fdc6463aa8468ccaf0b06244de1244497" ]
-  [ "digestif.1.4.0" "git+https://github.com/reuna-labs/digestif.git#0c969604c4d7022fc8fde05a5224ff31a72401f0" ]
+  [ "mirage-crypto.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
+  [ "mirage-crypto-rng.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
+  [ "mirage-crypto-secp256k1.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
+  [ "mirage-crypto-bip32.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
+  [ "mirage-crypto-pbkdf2.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
+  [ "digestif.1.4.0" "git+https://github.com/reuna-labs/digestif.git#770f9c355bd5fd60ebf63027b66a51920906519f" ]
 ]

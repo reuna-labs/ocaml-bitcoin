@@ -1,7 +1,7 @@
 (library
  (name bitcoin)
  (public_name bitcoin)
- (libraries digestif base64 bitcoin.backend mirage-crypto-bip32 mirage-crypto-secp256k1))
+ (libraries digestif base64 bitcoin.backend mirage-crypto-pbkdf2 mirage-crypto-bip32 mirage-crypto-secp256k1))
 
 ; The BIP39 wordlist is compiled in, never read from disk: a unikernel has
 ; no filesystem to read it from.
