@@ -52,9 +52,13 @@ build: [
 dev-repo: "git+https://github.com/reuna-labs/ocaml-bitcoin.git"
 # Development pins for the coordinated native crypto source.
 # Pins select versions; optional packages are installed only when required.
+# mirage-crypto-rng-mirage is not a dependency of bitcoin itself, but the Solo5
+# smoke unikernel's default_random pulls it in, and opam-monorepo refuses a
+# lock that vendors one dev-repo (mirage-crypto) from two different URLs.
 pin-depends: [
   [ "mirage-crypto.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
   [ "mirage-crypto-rng.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
+  [ "mirage-crypto-rng-mirage.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
   [ "mirage-crypto-secp256k1.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
   [ "mirage-crypto-bip32.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
   [ "mirage-crypto-pbkdf2.2.4.0" "git+https://github.com/reuna-labs/mirage-crypto.git#edeae749daa6f8eafb73446e68e654d00794e898" ]
