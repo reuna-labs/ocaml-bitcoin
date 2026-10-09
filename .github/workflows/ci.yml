@@ -58,16 +58,10 @@ jobs:
     # same commit as the pin-depends in bitcoin.opam.template, or the build
     # links against a fork that predates the packages bitcoin uses.
     #
-    # Still continue-on-error because of one fault outside this repository:
-    # at the pinned fork commit, mirage-crypto-pbkdf2.opam names
-    # reuna-labs/mirage-crypto as its dev-repo while every sibling package
-    # names mirage/mirage-crypto, so opam-monorepo refuses the lock with
-    # "Multiple dev-repos would be vendored into duniverse/mirage-crypto".
-    # With that one line made consistent in the fork the job locks, builds
-    # and produces dist/bitcoin-smoke.hvt. Bump the pins and the checkout
-    # below to that fork commit, then drop the flag.
+    # Until 2026-10-09 this job ran continue-on-error: at the old fork commit
+    # mirage-crypto-pbkdf2.opam named a different dev-repo from its siblings and
+    # opam-monorepo refused the lock. The fork commit pinned below fixes that.
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: ocaml/setup-ocaml@v3
@@ -79,7 +73,7 @@ jobs:
       - run: opam repository add overlays https://github.com/dune-universe/opam-overlays.git
       - run: opam install ocaml-solo5 mirage opam-monorepo
       - run: git clone https://github.com/reuna-labs/mirage-crypto.git ../mirage-crypto
-      - run: git -C ../mirage-crypto checkout edeae749daa6f8eafb73446e68e654d00794e898
+      - run: git -C ../mirage-crypto checkout 2dca1e4fd8f70ac26984785c8af6d2bd8fee63f9
       - run: MIRAGE_CRYPTO=$(cd ../mirage-crypto && pwd) opam exec -- ./unikernel/build.sh hvt
 
   doc:
