@@ -86,8 +86,8 @@ let to_entropy words =
 let check words = match to_entropy words with Ok _ -> true | Error _ -> false
 
 let seed_of_words ?(passphrase = "") words =
-  Mirage_crypto_pbkdf2.sha512 ~password:(String.concat " " words) ~salt:("mnemonic" ^ passphrase) ~iterations:2048
-    ~length:64
+  Mirage_crypto_pbkdf2.sha512 ~password:(String.concat " " words) ~salt:("mnemonic" ^ passphrase)
+    ~iterations:2048 ~length:64
 
 let to_seed_unchecked ?passphrase words = seed_of_words ?passphrase words
 

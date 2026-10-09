@@ -1,4 +1,5 @@
 ; Vendored libsecp256k1; no host library or bignum dependency.
+
 (library
  (name bitcoin_backend_mirage)
  (public_name bitcoin.backend-mirage)
