@@ -45,10 +45,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: reject I/O and platform dependencies under lib/
+        # A bare `! grep` does not trip `set -e` (SC2251), so only the last
+        # check used to decide the step; each one has to fail explicitly.
         run: |
-          set -e
-          ! grep -rnE '\b(Unix|Thread|Lwt|Async|Mutex|Domain)\.' lib/
-          ! grep -rnE '\b(open_in|open_out|Sys\.(command|argv|getenv)|Random\.self_init|print_endline|print_string)\b' lib/
+          if grep -rnE '\b(Unix|Thread|Lwt|Async|Mutex|Domain)\.' lib/; then exit 1; fi
+          if grep -rnE '\b(open_in|open_out|Sys\.(command|argv|getenv)|Random\.self_init|print_endline|print_string)\b' lib/; then exit 1; fi
 
   solo5:
     # Cross-builds the library into a MirageOS/Solo5 unikernel. This has been
