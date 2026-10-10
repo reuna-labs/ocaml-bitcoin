@@ -5,6 +5,9 @@ on:
     branches: [master, "rewrite/**"]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     strategy:
@@ -17,8 +20,10 @@ jobs:
             ocaml-compiler: "5.3"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: ocaml/setup-ocaml@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ocaml/setup-ocaml@93303b622b2522e4411e295f9e77411a24912ac7 # v3.9.0
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
       # The crypto dependencies are not yet on opam; bitcoin.opam.template
@@ -30,8 +35,10 @@ jobs:
   fmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ocaml/setup-ocaml@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ocaml/setup-ocaml@93303b622b2522e4411e295f9e77411a24912ac7 # v3.9.0
         with:
           ocaml-compiler: "5.3"
       # Exactly the version named in .ocamlformat, or the check is meaningless.
@@ -43,7 +50,9 @@ jobs:
     # exists. Cheap to check, and it keeps working while the solo5 job is red.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
       - name: reject I/O and platform dependencies under lib/
         # A bare `! grep` does not trip `set -e` (SC2251), so only the last
         # check used to decide the step; each one has to fail explicitly.
@@ -63,8 +72,10 @@ jobs:
     # opam-monorepo refused the lock. The fork commit pinned below fixes that.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ocaml/setup-ocaml@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ocaml/setup-ocaml@93303b622b2522e4411e295f9e77411a24912ac7 # v3.9.0
         with:
           # ocaml-solo5 pins an exact compiler per release; 1.3.3 wants this
           # one. Pairing it with 4.14 does not resolve.
@@ -79,8 +90,10 @@ jobs:
   doc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ocaml/setup-ocaml@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ocaml/setup-ocaml@93303b622b2522e4411e295f9e77411a24912ac7 # v3.9.0
         with:
           ocaml-compiler: "5.3"
       - run: opam install --deps-only --with-doc .
