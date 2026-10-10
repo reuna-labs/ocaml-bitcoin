@@ -1,0 +1,8 @@
+# reuna-gate configuration; see ~/reuna/infra/gates/README.md.
+
+[ocaml]
+# Not a code finding: the repository's local _opam switch can run neither
+# half. Re-enable once mirage-crypto-secp256k1 (the reuna-labs/mirage-crypto
+# fork the .opam pin-depends names) and ocamlformat 0.27.0 are in that switch.
+enabled = false
+reason = "the local _opam switch lacks mirage-crypto-secp256k1 (runtest cannot build) and has no ocamlformat (.ocamlformat pins 0.27.0)"
