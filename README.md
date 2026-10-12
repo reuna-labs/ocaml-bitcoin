@@ -126,6 +126,21 @@ rejected* rather than mis-parsed.
 These are omissions of scope, not oversights. Several are planned; none are
 required to build, sign and broadcast a transaction.
 
+## Public-testnet check
+
+`tools/signet-check.sh` is evidence from signet itself and needs no funds. It
+installs `bitcoin` from the Reuna opam overlay in a pinned container and does
+two things:
+
+- **Recomputes real signatures.** It recomputes the BIP143 and BIP341 digests
+  of P2WPKH and taproot key-path spends signet has already confirmed. The
+  chain's signatures must verify against them, and must stop verifying with
+  the input's amount one satoshi higher.
+- **Has a node judge a spend.** A fresh key signs a spend of someone else's
+  unspent output. A signet node must refuse it at the script check, the first
+  check that needs the owner's key, and must name this package's txid and
+  wtxid when it does.
+
 ## Security
 
 This library has not been audited. Do not use it to manage funds you are
